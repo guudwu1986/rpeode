@@ -29,9 +29,21 @@
 # and double that value when there exists one real eigen-value.
 # The order of "b" is permuted to break the ascension.
 
+# 2a. Scaling coefficients in the linear term to similar magnitude.
+# Disables 2b.
+# Only for case of even dimension,
+# and magnitude of imaginary part of eigenvalues is much larger than
+# real part.
+# For each 2x2 diagonal block, a similarity transformation
+#     a b
+#     c 1
+# is applied.
+# The optimal a,b,c are computed via Levenberg-Marquardt algorithm.
+
 generate.linear <- function (
   dimension
   , timepoint
+  , scaling = FALSE
   , sanitycheck = FALSE
 )
 
@@ -45,6 +57,8 @@ generate.linear <- function (
 #   Hence if "dimension" is even, all eigen-values are complex,
 #   otherwise there exists one real eigen-value in the spectrum.
 # timepoint: Time points for observation data curves.
+# scaling: Scaling coefficients of linear term to similar magnitude.
+#   Can only be applied for even dimension.
 # sanitycheck: Whether to perform a sanity check on input arguments.
 
 # OUTPUT:
@@ -90,6 +104,24 @@ if ( sanitycheck )
   }
 #}}}
 
+# scaling#{{{
+  if (
+    !is.logical(scaling)
+    || length(scaling)!=1
+  )
+  {
+    stop('Argument "scaling" must be a logical scalar.')
+  }
+
+  if (
+    scaling
+    && dimension%%2!=0
+  )
+  {
+    stop('Argument "scaling" cannot be TRUE for an odd "dimension".')
+  }
+#}}}
+
 }
 #}}}
 
@@ -108,6 +140,8 @@ eigen_real <- runif (
   , real_min
   , real_max
 )
+  eigen_real[] <- real_min
+
 
 eigen_imaginary <- 1:num_complex_eigen
 if ( num_real_eigen>0 )
@@ -176,6 +210,64 @@ if ( num_real_eigen == 1 )
 # Initial condition#{{{
 ret$initial <- rep ( 1 , dimension )
 ret$initial [ 2*(1:num_complex_eigen)-1 ] <- 0
+#}}}
+
+# Scaling#{{{
+if ( scaling )
+{
+  objective <- function (
+    par
+    , k
+  )
+  {
+    ret <- numeric(3)
+    temp <- k * ( par[1] - par[2]*par[3] )
+    ret[1] <- par[1]*par[3] + par[2] - temp
+    ret[2] <- par[1]**2 + par[2]**2 - temp
+    ret[3] <- par[3]**2 + 1 - temp
+    return(ret)
+  }
+
+  jacobian <- function (
+    par
+    , k
+  )
+  {
+    ret <- matrix ( 0 , 3 , 3 )
+    ret[1] <- par[3] - k
+    ret[2] <- 2*par[1] - k
+    ret[3] <- -k
+    ret[4] <- 1 + par[3]*k
+    ret[5] <- 2*par[2] + par[3]*k
+    ret[6] <- par[3]*k
+    ret[7] <- par[1] + par[2]*k
+    ret[8] <- par[2]*k
+    ret[9] <- 2*par[3] + par[2]*k
+    return(ret)
+  }
+
+  require('minpack.lm')
+  lapply ( 1 : num_complex_eigen , function(index)
+  {
+    scale_mat <-
+      nls.lm (
+        rep ( 1 , 3 )
+        , lower = numeric(3)
+        , upper = NULL
+        , fn = objective
+        , jac = jacobian
+        , control = nls.lm.control()
+        , k = num_complex_eigen/permute_index[index]
+      ) $ par
+    scale_mat <- matrix ( c(scale_mat,1) , 2 , 2 )
+    temp <- (2*index-1) : (2*index)
+    ret$data[,temp] <<- ret$data[,temp] %*% scale_mat
+    scale_mat <- t(scale_mat)
+    ret$linear[temp,temp] <<-
+      scale_mat %*% ret$linear[temp,temp] %*% solve(scale_mat)
+    ret$initial[temp] <<- scale_mat %*% ret$initial[temp]
+  } )
+}
 #}}}
 
 ret$data <- cbind ( timepoint , ret$data )

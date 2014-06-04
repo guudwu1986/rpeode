@@ -2,9 +2,11 @@ directory <- '~/program/rpeode/package/R/'
 
 source( paste(directory,'generate.linear.R',sep='') )
 
+#library('peode')
+
 # Parameter
 set.seed(0)
-dimension <- as.integer(5)
+dimension <- as.integer(6)
 time_point <- seq ( 0 , 1 , length.out=11 ) [-1]
 
 # Generate model
@@ -12,7 +14,8 @@ object <-
   generate.linear (
     dimension
     , time_point
-#    , sanitycheck = TRUE
+    , scaling = TRUE
+    , sanitycheck = TRUE
   )
 
 # Check curve with "ode" function from "deSolve" package.
@@ -45,4 +48,13 @@ difference <- ode_res[,-1] - object$data[,-1]
 rss <- norm ( difference , 'F' )
 cat('rss: ')
 cat(rss)
+cat('\n')
+
+# Magnitude check
+temp <- abs(object$linear[which(object$linear!=0)])
+cat('Largest entry: ')
+cat(max(abs(temp)))
+cat('\n')
+cat('Smallest entry: ')
+cat(min(abs(temp)))
 cat('\n')
