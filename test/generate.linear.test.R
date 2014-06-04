@@ -1,5 +1,4 @@
 directory <- '~/program/rpeode/package/R/'
-
 source( paste(directory,'generate.linear.R',sep='') )
 
 #library('peode')
@@ -23,6 +22,7 @@ object <-
     , time_point
 #    , scaling = TRUE
     , orthogonal_transformation = orthogonal_transformation
+    , row_column_permutation = TRUE
     , sanitycheck = TRUE
   )
 
