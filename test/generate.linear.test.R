@@ -6,15 +6,23 @@ source( paste(directory,'generate.linear.R',sep='') )
 
 # Parameter
 set.seed(0)
-dimension <- as.integer(6)
+dimension <- as.integer(7)
 time_point <- seq ( 0 , 1 , length.out=11 ) [-1]
+
+orthogonal_transformation <-
+  lapply (
+    1 : ((dimension-1)/2) , function(index)
+    {
+      return ( as.integer ( c ( 2*index , 2*index+1 ) ) )
+    } )
 
 # Generate model
 object <-
   generate.linear (
     dimension
     , time_point
-    , scaling = TRUE
+#    , scaling = TRUE
+    , orthogonal_transformation = orthogonal_transformation
     , sanitycheck = TRUE
   )
 

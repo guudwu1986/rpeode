@@ -40,10 +40,15 @@
 # is applied.
 # The optimal a,b,c are computed via Levenberg-Marquardt algorithm.
 
+# 2b. Use a series of similarity transformation via orthogonal matrices
+# to mix adjacent diagonal blocks.
+# Disables 2a.
+
 generate.linear <- function (
   dimension
   , timepoint
   , scaling = FALSE
+  , orthogonal_transformation = list()
   , sanitycheck = FALSE
 )
 
@@ -119,6 +124,43 @@ if ( sanitycheck )
   )
   {
     stop('Argument "scaling" cannot be TRUE for an odd "dimension".')
+  }
+#}}}
+
+# orthogonal_transformation#{{{
+  if ( !is.list(orthogonal_transformation) )
+  {
+    stop('Argument "orthogonal_transformation" should be a list.')
+  }
+  if (
+    scaling
+    && length(orthogonal_transformation)!=0
+  )
+  {
+    stop('Argument "orthogonal_transformation" can only be non-empty ',
+      'when "scaling" is FALSE.')
+  }
+  for ( item in orthogonal_transformation )
+  {
+    if (
+      !is.integer(item)
+      || length(item)!=2
+    )
+    {
+      stop('Each element of argument "orthogonal_transformation" '
+        ,'must be an integer vector of length 2.')
+    }
+    if ( item[1]>=item[2] )
+    {
+      stop('In each element of argument "orthogonal_transformation", ' ,
+        'the second component must be larger than first.'
+      )
+    }
+    if ( item[1]<1 || item[2]>dimension )
+    {
+      stop('Out-of-bound index in elements of '
+        ,'argument "orthogonal_transformation".')
+    }
   }
 #}}}
 
@@ -267,6 +309,19 @@ if ( scaling )
       scale_mat %*% ret$linear[temp,temp] %*% solve(scale_mat)
     ret$initial[temp] <<- scale_mat %*% ret$initial[temp]
   } )
+}
+#}}}
+
+# Orthogonal transformation#{{{
+for ( item in orthogonal_transformation )
+{
+  require('pracma')
+  temp <- diag(dimension)
+  temp [ item[1]:item[2] , item[1]:item[2] ] <-
+    pracma::rortho ( item[2]-item[1]+1 )
+  ret$data <- ret$data %*% t(temp)
+  ret$linear <- temp %*% ret$linear %*% t(temp)
+  ret$initial <- temp %*% ret$initial
 }
 #}}}
 
