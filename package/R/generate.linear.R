@@ -64,6 +64,7 @@ generate.linear <- function (
   , row_column_permutation = FALSE
   , constant = NULL
   , sanitycheck = FALSE
+  , output = NULL
 )
 
 # INPUT:
@@ -94,6 +95,8 @@ generate.linear <- function (
 #   which will be automatically expanded to a vector.
 #   The default NULL value disables the constant term.
 # sanitycheck: Whether to perform a sanity check on input arguments.
+# output: Filename to output parameters,
+#   which can be used by an external program.
 
 # OUTPUT:
 # initial: Initial condition of the system.
@@ -301,6 +304,7 @@ ret$linear [ cbind(temp,temp-1) ] <-
 #}}}
 
 # Data#{{{
+
 ret$data <- matrix ( 0 , length(timepoint) , dimension )
 
 lapply ( 1 : num_complex_eigen ,
@@ -317,6 +321,7 @@ lapply ( 1 : num_complex_eigen ,
 #}}}
 
 # Real eigenvalue#{{{
+
 if ( num_real_eigen == 1 )
 {
   ret$linear[dimension,dimension] <- tail(eigen_real,1)
@@ -325,11 +330,13 @@ if ( num_real_eigen == 1 )
 #}}}
 
 # Initial condition#{{{
+
 ret$initial <- rep ( 1 , dimension )
 ret$initial [ 2*(1:num_complex_eigen)-1 ] <- 0
 #}}}
 
 # Scaling#{{{
+
 if ( scaling )
 {
   objective <- function (
@@ -388,6 +395,7 @@ if ( scaling )
 #}}}
 
 # Orthogonal transformation#{{{
+
 for ( item in orthogonal_transformation )
 {
   require('pracma')
@@ -401,6 +409,7 @@ for ( item in orthogonal_transformation )
 #}}}
 
 # Row-column permutation#{{{
+
 if ( row_column_permutation )
 {
   require('permute')
@@ -413,6 +422,7 @@ if ( row_column_permutation )
 #}}}
 
 # Constant#{{{
+
 if ( constant_exist )
 {
   ret$constant <-
@@ -424,6 +434,42 @@ if ( constant_exist )
     return()
   } )
   ret$initial <- ret$initial - temp
+}
+#}}}
+
+# Output#{{{
+
+if ( !is.null(output) )
+{
+  sink ( output )
+
+  significant_digit = 15
+
+  cat(dimension)
+  cat('\n')
+
+  cat(length(timepoint))
+  cat('\n')
+
+  cat(formatC(timepoint,digits=significant_digit,format='g'))
+  cat('\n')
+
+  cat(formatC(t(ret$data),digits=significant_digit,format='g'))
+  cat('\n')
+
+  cat(formatC(ret$initial,digits=significant_digit,format='g'))
+  cat('\n')
+
+  cat(formatC(ret$linear,digits=significant_digit,format='g'))
+  cat('\n')
+
+  if ( !is.null(ret$constant) )
+  {
+    cat(formatC(ret$constant,digits=significant_digit,format='g'))
+    cat('\n')
+  }
+
+  sink()
 }
 #}}}
 
