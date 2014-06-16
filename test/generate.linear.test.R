@@ -5,8 +5,8 @@ library('peode')
 
 # Parameter
 set.seed(0)
-dimension <- as.integer(9)
-time_point <- seq ( 0 , 1 , length.out=101 ) #[-1]
+dimension <- as.integer(4)
+time_point <- seq ( 0 , 1 , length.out=11 ) #[-1]
 
 orthogonal_transformation <-
   lapply (
@@ -20,13 +20,16 @@ object <-
   generate.linear (
     dimension
     , time_point
-#    , scaling = TRUE
-    , orthogonal_transformation = orthogonal_transformation
+    , scaling = TRUE
+#    , orthogonal_transformation = orthogonal_transformation
     , row_column_permutation = TRUE
     , constant = list ( 0 , 1e-2 )
     , sanitycheck = TRUE
-    , output = 'temp'
-#    , output = '~/program/peode/test/linear_model/data'
+    , output =
+        list (
+          file = '~/program/peode/test/linear_model/sparse/data'
+          , sparse = TRUE
+        )
   )
 
 # Check curve with "ode" function from "deSolve" package.

@@ -95,8 +95,11 @@ generate.linear <- function (
 #   which will be automatically expanded to a vector.
 #   The default NULL value disables the constant term.
 # sanitycheck: Whether to perform a sanity check on input arguments.
-# output: Filename to output parameters,
-#   which can be used by an external program.
+# output: Output data as pure text file.
+#   NULL value disables output.
+#   Should be a list consisting of:
+#   file: Filename.
+#   sparse: A logical to determine whether to use sparse format.
 
 # OUTPUT:
 # initial: Initial condition of the system.
@@ -205,6 +208,24 @@ if ( sanitycheck )
   )
   {
     stop('Argument "row_column_permutation" must be a logical scalar.')
+  }
+#}}}
+
+# output#{{{
+  if ( !is.null(output) )
+  {
+    if ( !is.list(output) )
+    {
+      stop('Argument "output" must be a list.')
+    }
+    if ( !is.character(output$file) || length(output$file)!=1 )
+    {
+      stop('Argument "output$file" must be a string.')
+    }
+    if ( !is.logical(output$sparse) || length(output$sparse)!= 1 )
+    {
+      stop('Argument "output$sparse" must be logical.')
+    }
   }
 #}}}
 
@@ -441,32 +462,86 @@ if ( constant_exist )
 
 if ( !is.null(output) )
 {
-  sink ( output )
-
   significant_digit = 15
 
-  cat(dimension)
-  cat('\n')
+  sink ( output$file )
 
-  cat(length(timepoint))
-  cat('\n')
-
-  cat(formatC(timepoint,digits=significant_digit,format='g'))
-  cat('\n')
-
-  cat(formatC(t(ret$data),digits=significant_digit,format='g'))
-  cat('\n')
-
-  cat(formatC(ret$initial,digits=significant_digit,format='g'))
-  cat('\n')
-
-  cat(formatC(ret$linear,digits=significant_digit,format='g'))
-  cat('\n')
-
-  if ( !is.null(ret$constant) )
+  if ( output$sparse )
   {
-    cat(formatC(ret$constant,digits=significant_digit,format='g'))
+    cat(dimension)
     cat('\n')
+
+    cat(length(timepoint))
+    cat('\n')
+
+    index_linear <- which ( ret$linear != 0 )
+    if ( !is.null(ret$constant) )
+    {
+      index_constant <- which ( ret$constant != 0 )
+    }
+
+    cat(length(index_linear))
+    cat('\n')
+
+    if ( !is.null(ret$constant) )
+    {
+      cat(length(index_constant))
+    }
+    else
+    {
+      cat(0)
+    }
+    cat('\n')
+
+    cat(formatC(timepoint,digits=significant_digit,format='g'))
+    cat('\n')
+
+    cat(formatC(t(ret$data),digits=significant_digit,format='g'))
+    cat('\n')
+
+    cat(formatC(ret$initial,digits=significant_digit,format='g'))
+    cat('\n')
+
+    cat(index_linear)
+    cat('\n')
+
+    cat(formatC(ret$linear[index_linear],digits=significant_digit,format='g'))
+    cat('\n')
+
+    if ( !is.null(ret$constant) )
+    {
+      cat(index_constant)
+      cat('\n')
+
+      cat(formatC(ret$constant[index_constant],digits=significant_digit,format='g'))
+      cat('\n')
+    }
+  }
+  else
+  {
+    cat(dimension)
+    cat('\n')
+
+    cat(length(timepoint))
+    cat('\n')
+
+    cat(formatC(timepoint,digits=significant_digit,format='g'))
+    cat('\n')
+
+    cat(formatC(t(ret$data),digits=significant_digit,format='g'))
+    cat('\n')
+
+    cat(formatC(ret$initial,digits=significant_digit,format='g'))
+    cat('\n')
+
+    cat(formatC(ret$linear,digits=significant_digit,format='g'))
+    cat('\n')
+
+    if ( !is.null(ret$constant) )
+    {
+      cat(formatC(ret$constant,digits=significant_digit,format='g'))
+      cat('\n')
+    }
   }
 
   sink()
