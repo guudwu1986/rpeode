@@ -100,6 +100,9 @@ generate.linear <- function (
 #   Should be a list consisting of:
 #   file: Filename.
 #   sparse: A logical to determine whether to use sparse format.
+#   timefirst: A logical to determine order of output data.
+#     If true, output one curve on each time-point, then next.
+#     If false, output each curve on one time-point, then next.
 
 # OUTPUT:
 # initial: Initial condition of the system.
@@ -226,6 +229,10 @@ if ( sanitycheck )
     {
       stop('Argument "output$sparse" must be logical.')
     }
+    if ( !is.logical(output$timefirst) || length(output$timefirst)!= 1 )
+    {
+      stop('Argument "output$timefirst" must be logical.')
+    }
   }
 #}}}
 
@@ -282,7 +289,6 @@ eigen_real <- runif (
   , real_max
 )
   eigen_real[] <- real_min
-
 
 eigen_imaginary <- 1:num_complex_eigen
 if ( num_real_eigen>0 )
@@ -496,8 +502,16 @@ if ( !is.null(output) )
     cat(formatC(timepoint,digits=significant_digit,format='g'))
     cat('\n')
 
-    cat(formatC(t(ret$data),digits=significant_digit,format='g'))
-    cat('\n')
+    if ( output$timefirst )
+    {
+      cat(formatC(ret$data,digits=significant_digit,format='g'))
+      cat('\n')
+    }
+    else
+    {
+      cat(formatC(t(ret$data),digits=significant_digit,format='g'))
+      cat('\n')
+    }
 
     cat(formatC(ret$initial,digits=significant_digit,format='g'))
     cat('\n')
@@ -528,8 +542,16 @@ if ( !is.null(output) )
     cat(formatC(timepoint,digits=significant_digit,format='g'))
     cat('\n')
 
-    cat(formatC(t(ret$data),digits=significant_digit,format='g'))
-    cat('\n')
+    if ( output$timefirst )
+    {
+      cat(formatC(ret$data,digits=significant_digit,format='g'))
+      cat('\n')
+    }
+    else
+    {
+      cat(formatC(t(ret$data),digits=significant_digit,format='g'))
+      cat('\n')
+    }
 
     cat(formatC(ret$initial,digits=significant_digit,format='g'))
     cat('\n')

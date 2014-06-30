@@ -27,8 +27,9 @@ object <-
     , sanitycheck = TRUE
     , output =
         list (
-          file = '~/program/peode/test/linear_model/sparse/data'
+          file = 'data'
           , sparse = TRUE
+          , timefirst = TRUE
         )
   )
 
