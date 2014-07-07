@@ -1,7 +1,7 @@
-#directory <- '~/program/rpeode/package/R/'
-#source( paste(directory,'generate.linear.R',sep='') )
+directory <- '~/program/rpeode/package/R/'
+source( paste(directory,'generate.linear.R',sep='') )
 
-library('peode')
+#library('peode')
 
 # Parameter
 set.seed(0)
@@ -20,16 +20,16 @@ object <-
   generate.linear (
     dimension
     , time_point
-    , scaling = TRUE
+#    , scaling = TRUE
 #    , orthogonal_transformation = orthogonal_transformation
-    , row_column_permutation = TRUE
-    , constant = list ( 0 , 1e-2 )
+#    , row_column_permutation = TRUE
+#    , constant = list ( 0 , 1e-2 )
     , sanitycheck = TRUE
     , output =
         list (
-          file = 'data'
-          , sparse = TRUE
-          , timefirst = TRUE
+          file = '~/program/peode/test/linear_inverse_eigen/ConstructODE/data'
+          , sparse = FALSE
+          , timefirst = FALSE
         )
   )
 

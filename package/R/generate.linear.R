@@ -288,7 +288,7 @@ eigen_real <- runif (
   , real_min
   , real_max
 )
-  eigen_real[] <- real_min
+#  eigen_real[] <- real_min
 
 eigen_imaginary <- 1:num_complex_eigen
 if ( num_real_eigen>0 )
@@ -522,6 +522,12 @@ if ( !is.null(output) )
     cat(formatC(ret$linear[index_linear],digits=significant_digit,format='g'))
     cat('\n')
 
+    cat(formatC(c(Re(ret$eigen_complex),ret$eigen_real),digits=significant_digit,format='g'))
+    cat('\n')
+
+    cat(formatC(Im(ret$eigen_complex),digits=significant_digit,format='g'))
+    cat('\n')
+
     if ( !is.null(ret$constant) )
     {
       cat(index_constant)
@@ -557,6 +563,12 @@ if ( !is.null(output) )
     cat('\n')
 
     cat(formatC(ret$linear,digits=significant_digit,format='g'))
+    cat('\n')
+
+    cat(formatC(c(Re(ret$eigen_complex),ret$eigen_real),digits=significant_digit,format='g'))
+    cat('\n')
+
+    cat(formatC(Im(ret$eigen_complex),digits=significant_digit,format='g'))
     cat('\n')
 
     if ( !is.null(ret$constant) )
