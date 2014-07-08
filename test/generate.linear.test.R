@@ -3,10 +3,22 @@ source( paste(directory,'generate.linear.R',sep='') )
 
 #library('peode')
 
+# Random Seed
+
+arg <- commandArgs(TRUE)
+
+if ( length(arg) > 0 )
+{
+  set.seed(arg[1])
+} else
+{
+  set.seed(0)
+}
+
 # Parameter
-set.seed(0)
-dimension <- as.integer(4)
-time_point <- seq ( 0 , 1 , length.out=11 ) #[-1]
+
+dimension <- as.integer(10)
+time_point <- seq ( 0 , 1 , length.out=2*dimension+1 ) #[-1]
 
 orthogonal_transformation <-
   lapply (
@@ -20,14 +32,17 @@ object <-
   generate.linear (
     dimension
     , time_point
-#    , scaling = TRUE
+    , scaling = TRUE
 #    , orthogonal_transformation = orthogonal_transformation
 #    , row_column_permutation = TRUE
 #    , constant = list ( 0 , 1e-2 )
+    , noiselevel = 0.3
     , sanitycheck = TRUE
     , output =
         list (
-          file = '~/program/peode/test/linear_inverse_eigen/ConstructODE/data'
+#          file = '~/program/peode/simulation/eigen_lasso/data'
+#          file = '~/program/peode/test/linear_inverse_eigen/ConstructODE/data'
+          file = '~/tmp/bash/data'
           , sparse = FALSE
           , timefirst = FALSE
         )

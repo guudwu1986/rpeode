@@ -63,6 +63,7 @@ generate.linear <- function (
   , orthogonal_transformation = list()
   , row_column_permutation = FALSE
   , constant = NULL
+  , noiselevel = 0
   , sanitycheck = FALSE
   , output = NULL
 )
@@ -94,6 +95,10 @@ generate.linear <- function (
 #   Each component can also be a scalar,
 #   which will be automatically expanded to a vector.
 #   The default NULL value disables the constant term.
+# noiselevel: If larger than 0,
+#   iid Gaussian noise will be added to data.
+#   This argument gives the ratio of standard deviation of noise and
+#   data.
 # sanitycheck: Whether to perform a sanity check on input arguments.
 # output: Output data as pure text file.
 #   NULL value disables output.
@@ -211,6 +216,17 @@ if ( sanitycheck )
   )
   {
     stop('Argument "row_column_permutation" must be a logical scalar.')
+  }
+#}}}
+
+# noiselevel#{{{
+  if (
+    !is.numeric(noiselevel)
+    || length(row_column_permutation)!=1
+    || noiselevel < 0
+  )
+  {
+    stop('Argument "noiselevel" must be a positive number.')
   }
 #}}}
 
@@ -461,6 +477,20 @@ if ( constant_exist )
     return()
   } )
   ret$initial <- ret$initial - temp
+}
+#}}}
+
+# Noise#{{{
+
+if ( noiselevel > 0 )
+{
+  ret$noise <-
+    matrix (
+      rnorm ( length(ret$data) , 0 , noiselevel*sd(ret$data) )
+      , nrow(ret$data)
+      , ncol(ret$data)
+    )
+  ret$data <- ret$data + ret$noise
 }
 #}}}
 
